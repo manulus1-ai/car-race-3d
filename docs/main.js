@@ -335,6 +335,10 @@ const GAME = {
   bestLap: null,
   passedCheckpoint: false,
   muted: false,
+
+  // penalties
+  offTrackSeconds: 0,
+  _lastOffToastAt: 0,
 };
 elLapsTotal.textContent = String(GAME.lapsTotal);
 
@@ -356,6 +360,8 @@ function resetRun() {
   GAME.startTime = performance.now();
   GAME.lapStartTime = performance.now();
   GAME.running = true;
+  GAME.offTrackSeconds = 0;
+  GAME._lastOffToastAt = 0;
   updateUI(0);
   showToast('Go!');
 }
@@ -470,6 +476,19 @@ function step(dt) {
   const onTrack = isOnTrack(carState.pos);
   const d = onTrack ? drag : offTrackDrag;
   carState.vel.multiplyScalar(Math.max(0, 1 - d * dt));
+
+  // Off-track penalty (gentle but noticeable)
+  if (!onTrack) {
+    GAME.offTrackSeconds += dt;
+    // drain score slowly while off-track
+    GAME.score = Math.max(0, GAME.score - Math.ceil(6 * dt));
+
+    const nowMs = performance.now();
+    if (nowMs - GAME._lastOffToastAt > 1600) {
+      GAME._lastOffToastAt = nowMs;
+      showToast('Off track — return to the road!', 650);
+    }
+  }
 
   // Integrate
   carState.pos.addScaledVector(carState.vel, dt);
