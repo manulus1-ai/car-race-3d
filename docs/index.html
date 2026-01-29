@@ -20,9 +20,17 @@
       <button id="reset" class="btn">Reset (R)</button>
       <button id="mute" class="btn">Sound: On (M)</button>
     </div>
-    <div id="help" class="help">
-      <b>Controls</b>: WASD / Arrow keys. On mobile: touch buttons.
-      <span class="dim">Tip: hold accelerate through turns; avoid cones.</span>
+
+    <div class="row bottom-row">
+      <div id="help" class="help">
+        <b>Controls</b>: WASD / Arrow keys. On mobile: touch buttons.
+        <span class="dim">Tip: hold accelerate through turns; avoid cones.</span>
+      </div>
+
+      <div id="minimap" class="minimap" aria-label="Minimap">
+        <div class="minimap-title">MAP</div>
+        <canvas id="map" width="180" height="180"></canvas>
+      </div>
     </div>
   </div>
 

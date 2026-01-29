@@ -12,6 +12,8 @@ const elScore = document.getElementById('score');
 const btnReset = document.getElementById('reset');
 const btnMute = document.getElementById('mute');
 const toast = document.getElementById('toast');
+const mapCanvas = document.getElementById('map');
+const mapCtx = mapCanvas ? mapCanvas.getContext('2d') : null;
 
 // --- Scene
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -535,6 +537,115 @@ function step(dt) {
   }
 }
 
+function drawMinimap() {
+  if (!mapCtx) return;
+
+  const W = mapCanvas.width;
+  const H = mapCanvas.height;
+
+  // world bounds for scaling (track centered near origin)
+  const pad = 8;
+  const maxX = TRACK.halfW + TRACK.cornerR + 6;
+  const maxZ = TRACK.halfH + TRACK.cornerR + 6;
+
+  const sx = (W - pad * 2) / (maxX * 2);
+  const sz = (H - pad * 2) / (maxZ * 2);
+  const s = Math.min(sx, sz);
+
+  const toMap = (x, z) => {
+    // map origin at center
+    const mx = W / 2 + x * s;
+    const my = H / 2 + z * s;
+    return [mx, my];
+  };
+
+  mapCtx.clearRect(0, 0, W, H);
+
+  // background
+  mapCtx.fillStyle = 'rgba(0,0,0,0.35)';
+  mapCtx.fillRect(0, 0, W, H);
+
+  // track path
+  mapCtx.lineWidth = 10;
+  mapCtx.lineCap = 'round';
+  mapCtx.strokeStyle = 'rgba(255,255,255,0.20)';
+  mapCtx.beginPath();
+  const N = 220;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const p = curve.getPoint(t);
+    const [mx, my] = toMap(p.x, p.z);
+    if (i === 0) mapCtx.moveTo(mx, my);
+    else mapCtx.lineTo(mx, my);
+  }
+  mapCtx.stroke();
+
+  // centerline
+  mapCtx.lineWidth = 2;
+  mapCtx.strokeStyle = 'rgba(124, 181, 255, 0.35)';
+  mapCtx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const p = curve.getPoint(t);
+    const [mx, my] = toMap(p.x, p.z);
+    if (i === 0) mapCtx.moveTo(mx, my);
+    else mapCtx.lineTo(mx, my);
+  }
+  mapCtx.stroke();
+
+  // start line marker
+  {
+    const [sx0, sy0] = toMap(startLine.position.x, startLine.position.z);
+    mapCtx.fillStyle = 'rgba(255,255,255,0.75)';
+    mapCtx.beginPath();
+    mapCtx.arc(sx0, sy0, 3.2, 0, Math.PI * 2);
+    mapCtx.fill();
+  }
+
+  // checkpoint marker
+  {
+    const [cx0, cy0] = toMap(checkpointPos.x, checkpointPos.z);
+    mapCtx.fillStyle = 'rgba(34,197,94,0.65)';
+    mapCtx.beginPath();
+    mapCtx.arc(cx0, cy0, 3.2, 0, Math.PI * 2);
+    mapCtx.fill();
+  }
+
+  // obstacles (small dots)
+  mapCtx.fillStyle = 'rgba(255,176,0,0.6)';
+  for (const ob of obstacles) {
+    const [ox, oy] = toMap(ob.mesh.position.x, ob.mesh.position.z);
+    mapCtx.fillRect(ox - 1.5, oy - 1.5, 3, 3);
+  }
+
+  // car
+  {
+    const [x, y] = toMap(carState.pos.x, carState.pos.z);
+    const on = isOnTrack(carState.pos);
+
+    mapCtx.save();
+    mapCtx.translate(x, y);
+    mapCtx.rotate(-carState.yaw);
+
+    // arrow-ish car marker
+    mapCtx.fillStyle = on ? 'rgba(255,60,100,0.95)' : 'rgba(239,68,68,0.95)';
+    mapCtx.beginPath();
+    mapCtx.moveTo(0, -6);
+    mapCtx.lineTo(4.5, 6);
+    mapCtx.lineTo(0, 3.2);
+    mapCtx.lineTo(-4.5, 6);
+    mapCtx.closePath();
+    mapCtx.fill();
+
+    mapCtx.restore();
+  }
+
+  // border
+  mapCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+  mapCtx.lineWidth = 1;
+  mapCtx.strokeRect(0.5, 0.5, W - 1, H - 1);
+}
+
 function updateUI(dt) {
   elLap.textContent = String(GAME.lap);
   elHits.textContent = String(GAME.hits);
@@ -546,6 +657,8 @@ function updateUI(dt) {
 
   const sp = Math.round(carState.vel.length() * 6);
   elSpeed.textContent = String(sp);
+
+  drawMinimap();
 }
 
 // Render loop

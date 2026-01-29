@@ -38,6 +38,11 @@ html, body {
   margin-bottom: 8px;
 }
 
+#ui .bottom-row{
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
 .pill {
   pointer-events: none;
   background: var(--pill);
@@ -85,6 +90,32 @@ html, body {
   border-radius: 14px;
   font-size: 16px;
   backdrop-filter: blur(10px);
+}
+
+.minimap{
+  pointer-events: none;
+  width: 196px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.minimap-title{
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  opacity: 0.75;
+  margin: 0 0 6px 2px;
+}
+
+#map{
+  width: 180px;
+  height: 180px;
+  display: block;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 #touch {
