@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Car Race 3D</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="ui">
+    <div class="row">
+      <div class="pill"><b>Lap</b> <span id="lap">0</span>/<span id="lapsTotal">3</span></div>
+      <div class="pill"><b>Time</b> <span id="time">0.0</span>s</div>
+      <div class="pill"><b>Best</b> <span id="best">—</span></div>
+      <div class="pill"><b>Speed</b> <span id="speed">0</span></div>
+    </div>
+    <div class="row">
+      <div class="pill"><b>Hits</b> <span id="hits">0</span></div>
+      <div class="pill"><b>Score</b> <span id="score">0</span></div>
+      <button id="reset" class="btn">Reset (R)</button>
+      <button id="mute" class="btn">Sound: On (M)</button>
+    </div>
+    <div id="help" class="help">
+      <b>Controls</b>: WASD / Arrow keys. On mobile: touch buttons.
+      <span class="dim">Tip: hold accelerate through turns; avoid cones.</span>
+    </div>
+  </div>
+
+  <div id="touch" aria-hidden="true">
+    <div class="touch-left">
+      <button class="touch-btn" data-action="left">◀</button>
+      <button class="touch-btn" data-action="right">▶</button>
+    </div>
+    <div class="touch-right">
+      <button class="touch-btn" data-action="up">▲</button>
+      <button class="touch-btn" data-action="down">▼</button>
+    </div>
+  </div>
+
+  <canvas id="c"></canvas>
+  <div id="toast" class="toast" hidden></div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

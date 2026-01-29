@@ -1,0 +1,123 @@
+:root {
+  --bg: #0b0f14;
+  --fg: #e8eef5;
+  --dim: #a7b6c7;
+  --pill: rgba(255,255,255,0.09);
+  --pill2: rgba(255,255,255,0.14);
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+#c {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+#ui {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  pointer-events: none;
+  user-select: none;
+}
+
+#ui .row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pill {
+  pointer-events: none;
+  background: var(--pill);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.btn {
+  pointer-events: auto;
+  background: var(--pill2);
+  color: var(--fg);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn:active { transform: translateY(1px); }
+
+.help {
+  pointer-events: none;
+  font-size: 13px;
+  opacity: 0.92;
+  background: rgba(0,0,0,0.18);
+  display: inline-block;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.dim { color: var(--dim); }
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 16px;
+  backdrop-filter: blur(10px);
+}
+
+#touch {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+.touch-left, .touch-right {
+  position: absolute;
+  bottom: 16px;
+  display: flex;
+  gap: 14px;
+}
+
+.touch-left { left: 16px; }
+.touch-right { right: 16px; }
+
+.touch-btn {
+  pointer-events: auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: var(--fg);
+  font-size: 26px;
+  touch-action: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #touch { display: none; }
+}
