@@ -26,6 +26,7 @@ html, body {
   top: 10px;
   left: 10px;
   right: 10px;
+  z-index: 10;
   pointer-events: none;
   user-select: none;
 }
@@ -75,6 +76,7 @@ html, body {
   padding: 8px 10px;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
+  max-width: min(720px, calc(100vw - 240px));
 }
 
 .dim { color: var(--dim); }
@@ -100,6 +102,17 @@ html, body {
   border-radius: 14px;
   padding: 8px;
   backdrop-filter: blur(8px);
+}
+
+/* Keep it visible regardless of flex wrapping */
+#minimap{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+@media (max-width: 520px){
+  #minimap{ top: auto; right: 10px; bottom: 96px; }
 }
 
 .minimap-title{
