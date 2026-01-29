@@ -218,6 +218,88 @@ const carState = {
 car.position.copy(carState.pos);
 car.rotation.y = carState.yaw;
 
+// --- Particles (tiny skid smoke)
+const SKID = {
+  max: 280,
+  size: 0.55,
+  baseRate: 24, // particles/sec at full skid
+  life: 0.65,
+};
+
+const skidGeom = new THREE.BufferGeometry();
+const skidPos = new Float32Array(SKID.max * 3);
+skidGeom.setAttribute('position', new THREE.BufferAttribute(skidPos, 3));
+skidGeom.setDrawRange(0, 0);
+
+const skidMat = new THREE.PointsMaterial({
+  color: 0xd7d7d7,
+  size: SKID.size,
+  transparent: true,
+  opacity: 0.85,
+  depthWrite: false,
+});
+
+const skidPoints = new THREE.Points(skidGeom, skidMat);
+skidPoints.frustumCulled = false;
+scene.add(skidPoints);
+
+const skidParticles = [];
+let skidAcc = 0;
+
+function spawnSkidParticle() {
+  // spawn near rear axle, with a little jitter
+  const rear = tmpV.set(Math.sin(carState.yaw), 0, Math.cos(carState.yaw)).normalize();
+  const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), rear).normalize();
+
+  const p = carState.pos
+    .clone()
+    .addScaledVector(rear, -1.05)
+    .addScaledVector(right, (Math.random() * 2 - 1) * 0.35);
+  p.y = 0.12;
+
+  const v = new THREE.Vector3(
+    (Math.random() * 2 - 1) * 0.35,
+    0,
+    (Math.random() * 2 - 1) * 0.35
+  );
+
+  skidParticles.push({ p, v, age: 0 });
+}
+
+function updateSkidParticles(dt, skidFactor) {
+  // spawn
+  skidAcc += dt * SKID.baseRate * skidFactor;
+  while (skidAcc >= 1) {
+    skidAcc -= 1;
+    if (skidParticles.length < SKID.max) spawnSkidParticle();
+  }
+
+  // update
+  for (let i = skidParticles.length - 1; i >= 0; i--) {
+    const s = skidParticles[i];
+    s.age += dt;
+    if (s.age >= SKID.life) {
+      skidParticles.splice(i, 1);
+      continue;
+    }
+    s.p.addScaledVector(s.v, dt);
+    // drift + expand a bit
+    s.v.multiplyScalar(1 - 1.6 * dt);
+  }
+
+  // write buffers
+  const n = skidParticles.length;
+  for (let i = 0; i < n; i++) {
+    const s = skidParticles[i];
+    skidPos[i * 3 + 0] = s.p.x;
+    skidPos[i * 3 + 1] = s.p.y;
+    skidPos[i * 3 + 2] = s.p.z;
+
+  }
+  skidGeom.setDrawRange(0, n);
+  skidGeom.attributes.position.needsUpdate = true;
+}
+
 // Obstacles (cones/boxes) placed around track
 const obstacles = [];
 const coneGeom = new THREE.ConeGeometry(0.45, 1.2, 10);
@@ -476,6 +558,13 @@ function step(dt) {
   const onTrack = isOnTrack(carState.pos);
   const d = onTrack ? drag : offTrackDrag;
   carState.vel.multiplyScalar(Math.max(0, 1 - d * dt));
+
+  // Skid smoke when turning at speed (on track)
+  const skidFactor = onTrack
+    ? THREE.MathUtils.clamp((Math.abs(steer) * steerStrength * speed) / 18, 0, 1)
+    : 0;
+  skidMat.opacity = 0.35 + 0.5 * skidFactor;
+  updateSkidParticles(dt, skidFactor);
 
   // Off-track penalty (gentle but noticeable)
   if (!onTrack) {
