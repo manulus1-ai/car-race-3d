@@ -368,7 +368,9 @@ function inputAxis() {
 }
 
 // --- Simple helpers
+const UP = new THREE.Vector3(0, 1, 0);
 const tmpV = new THREE.Vector3();
+const tmpV2 = new THREE.Vector3();
 function distXZ(a, b) {
   const dx = a.x - b.x;
   const dz = a.z - b.z;
@@ -558,6 +560,14 @@ function step(dt) {
   const onTrack = isOnTrack(carState.pos);
   const d = onTrack ? drag : offTrackDrag;
   carState.vel.multiplyScalar(Math.max(0, 1 - d * dt));
+
+  // Lateral grip: damp sideways velocity so the car feels less "floaty"
+  // (stronger on-track, weaker off-track).
+  const right = tmpV2.crossVectors(UP, forward).normalize();
+  const lateral = carState.vel.dot(right);
+  const gripK = onTrack ? 14 : 6;
+  const gripFactor = 1 - Math.exp(-gripK * dt);
+  carState.vel.addScaledVector(right, -lateral * gripFactor);
 
   // Skid smoke when turning at speed (on track)
   const skidFactor = onTrack
